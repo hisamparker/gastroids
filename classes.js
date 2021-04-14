@@ -4,8 +4,8 @@ class GameArea {
         this.ctx = canvas.getContext ? canvas.getContext('2d') : alert('upgrade now bish.');
         this.size = {w: this.canvas.width, h: this.canvas.height};
         this.frames = 0;
-        this.score = 0;
-        this.level = 0;
+        this.points = 0;
+        this.level = 1;
         this.rafId = null;
         this.projectiles = [];
         this.enemies = [];
@@ -58,6 +58,8 @@ class GameArea {
         this.rafId = requestAnimationFrame(() => this.updateGame());
         this.ctx.clearRect(0, 0, canvas.width, canvas.height);
         this.player.drawPlayer();
+        this.frames += 1;
+        this.levelUp();
 
         this.projectiles.forEach((projectile, index) => {
             projectile.update();
@@ -78,13 +80,21 @@ class GameArea {
     
             const distance = Math.hypot(this.player.pos.x - enemy.pos.x, this.player.pos.y - enemy.pos.y); 
             if (distance - enemy.size.w/2 - this.player.size.w/2 < 1){
+                this.enemies.splice(index, 1);
+                this.player.lives -= 1;
+                trackLives(this.player.lives);
+                if(this.player.lives <= 0) {
                     cancelAnimationFrame(this.rafId);
+                }
             }
             
             //remove projectiles and enemies if they crash
             this.projectiles.forEach((projectile, projectileIndex) => {
                 const distance = Math.hypot(projectile.pos.x - enemy.pos.x, projectile.pos.y - enemy.pos.y); {
                     if (distance - enemy.size.w/2 - projectile.size.w/2 < 1){
+                        this.points += 10;
+                        keepScore(this.points);
+                        console.log(this.points)
                         setTimeout(() => {
                             this.enemies.splice(index, 1);
                             this.projectiles.splice(projectileIndex, 1);
@@ -95,8 +105,14 @@ class GameArea {
         });
     }
 
-    updatePoints(){
-
+    levelUp() {
+        if (this.frames % 500 === 0){
+            this.level += 1;
+            trackLevels(this.level);
+        }
+        if (this.level >= 10) {
+            this.winGame();
+        }
     }
 
     stopGame() {

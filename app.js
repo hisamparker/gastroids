@@ -30,3 +30,17 @@ function sizeCanvasToParent () {
 //update canvas size to match main element
 window.onresize = sizeCanvasToParent;
 
+function keepScore (points) {
+  const score = document.getElementById('score');
+  score.innerText = points;
+}
+
+function trackLives (lives) {
+  const charLives = document.getElementById('lives');
+  charLives.innerText = lives;
+}
+
+function trackLevels (level) {
+  const levels = document.getElementById('level');
+  levels.innerText = level;
+}

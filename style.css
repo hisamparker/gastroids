@@ -1,3 +1,7 @@
+//fonts     
+/* font-family: 'Montserrat', sans-serif;
+font-family: 'Roboto Slab', serif; */
+
 *,
 *::after,
 *::before {
@@ -16,6 +20,21 @@ body {
 
 body.isPlaying #start_button{
     display: none;
+}
+
+h2 {
+    font-family: 'Roboto Slab', serif;
+    font-size: 3rem;
+    padding: 0;
+    margin: 0;
+}
+
+p {
+    padding: 0;
+    margin: 0;
+    font-family: 'Montserrat', sans-serif;
+    font-size: 3rem;
+    
 }
 
 header,
@@ -51,6 +70,16 @@ overflow: hidden;
 aside {
 grid-column: span 2;
 background-color: blueviolet;
+color: white;
+padding-top: 1rem;
+padding-bottom: 1rem;
+}
+
+.container {
+    display: flex;
+    flex-direction: column;
+    justify-content: space-around;
+    align-items: center;
 }
 
 #start_button {
@@ -63,6 +92,8 @@ justify-content: center;
 align-items: center;
 text-decoration: none;
 font-size: 2rem;
+border-radius: 20px;
+font-family: 'Roboto Slab', serif;
 }
 
 canvas {
@@ -74,6 +105,16 @@ canvas {
 main,
 aside {
     grid-column: 1 / span 5;
+}
+
+.container {
+    flex-direction: row;
+    justify-content: space-around;
+    align-content: center;
+}
+
+p {
+    padding: 1rem;
 }
 
 }
