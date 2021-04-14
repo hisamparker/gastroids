@@ -15,7 +15,9 @@ class GameArea {
 
     initGame(){
         requestAnimationFrame(() => this.updateGame());
-        this.spawnEnemies();
+        if (this.state === 'playing') {
+            this.spawnEnemies();
+        }
 
     }
 
@@ -49,66 +51,66 @@ class GameArea {
             x:Math.cos(angle),
             y:Math.sin(angle)
             };
-    
-            this.enemies.push(new Enemy(this.canvas, this.ctx, x, y, velocity));
-        }, 1000);
+            if (this.state === 'playing') {
+                this.enemies.push(new Enemy(this.canvas, this.ctx, x, y, velocity, this));
+            }
+        }, 1000);  
     }
 
     updateGame(){
         this.rafId = requestAnimationFrame(() => this.updateGame());
         this.ctx.clearRect(0, 0, canvas.width, canvas.height);
         this.player.drawPlayer();
-        if (this.state === 'playing') {
-            this.frames += 1;
-            this.levelUp();
+    
+        this.frames += 1;
+        this.levelUp();
 
-            this.projectiles.forEach((projectile, index) => {
-                projectile.update();
-                //remove offscreen projectiles
-                if(
-                    projectile.pos.x + projectile.size.w < 0 || 
-                    projectile.pos.x - projectile.size.w > this.size.w || 
-                    projectile.y + projectile.size.h < 0 || 
-                    projectile.y - projectile.size.h > this.size.h) {
-                    setTimeout(() => {
-                        this.projectiles.splice(index, 1);
-                    }, 0);
+        this.projectiles.forEach((projectile, index) => {
+            projectile.update();
+            //remove offscreen projectiles
+            if(
+                projectile.pos.x + projectile.size.w < 0 || 
+                projectile.pos.x - projectile.size.w > this.size.w || 
+                projectile.y + projectile.size.h < 0 || 
+                projectile.y - projectile.size.h > this.size.h) {
+                setTimeout(() => {
+                    this.projectiles.splice(index, 1);
+                }, 0);
+            }
+        });
+
+        this.enemies.forEach((enemy, index) => {
+            enemy.update();
+    
+            const distance = Math.hypot(this.player.pos.x - enemy.pos.x, this.player.pos.y - enemy.pos.y); 
+            if (distance - enemy.size.w/2 - this.player.size.w/2 < 1){
+                this.enemies.splice(index, 1);
+                this.player.lives -= 1;
+                trackLives(this.player.lives);
+                if(this.player.lives <= 0) {
+                    this.loseGame();
                 }
-            });
-
-            this.enemies.forEach((enemy, index) => {
-                enemy.update();
-        
-                const distance = Math.hypot(this.player.pos.x - enemy.pos.x, this.player.pos.y - enemy.pos.y); 
-                if (distance - enemy.size.w/2 - this.player.size.w/2 < 1){
-                    this.enemies.splice(index, 1);
-                    this.player.lives -= 1;
-                    trackLives(this.player.lives);
-                    if(this.player.lives <= 0) {
-                        this.loseGame();
+            }
+            
+            //remove projectiles and enemies if they crash
+            this.projectiles.forEach((projectile, projectileIndex) => {
+                const distance = Math.hypot(projectile.pos.x - enemy.pos.x, projectile.pos.y - enemy.pos.y); {
+                    if (distance - enemy.size.w/2 - projectile.size.w/2 < 1){
+                        this.points += 10;
+                        keepScore(this.points);
+                        setTimeout(() => {
+                            this.enemies.splice(index, 1);
+                            this.projectiles.splice(projectileIndex, 1);
+                        }, 0);
                     }
                 }
-                
-                //remove projectiles and enemies if they crash
-                this.projectiles.forEach((projectile, projectileIndex) => {
-                    const distance = Math.hypot(projectile.pos.x - enemy.pos.x, projectile.pos.y - enemy.pos.y); {
-                        if (distance - enemy.size.w/2 - projectile.size.w/2 < 1){
-                            this.points += 10;
-                            keepScore(this.points);
-                            console.log(this.points)
-                            setTimeout(() => {
-                                this.enemies.splice(index, 1);
-                                this.projectiles.splice(projectileIndex, 1);
-                            }, 0);
-                        }
-                    }
-                });
             });
-        }
+        });
+    
     }
 
     levelUp() {
-        if (this.frames % 500 === 0){
+        if (this.frames % 500 === 0 && this.state === 'playing'){
             this.level += 1;
             trackLevels(this.level);
         }
@@ -233,7 +235,8 @@ class Projectile {
 }
 
 class Enemy {
-    constructor(canvas, ctx, x, y, velocity){
+    constructor(canvas, ctx, x, y, velocity, gameArea){
+        this.gameArea = gameArea;
         this.canvas = canvas;
         this.ctx = ctx;
         this.size = {w: 40, h: 40};
@@ -250,8 +253,13 @@ class Enemy {
 
     update() {
         this.drawEnemy();
-        this.pos.x = this.pos.x + this.vel.x;
-        this.pos.y = this.pos.y + this.vel.y;
+        if (this.gameArea.state === 'dying' || this.gameArea.state === 'winning') {
+            this.pos.x = this.pos.x;
+            this.pos.y += 5;
+        } else {
+            this.pos.x = this.pos.x + this.vel.x;
+            this.pos.y = this.pos.y + this.vel.y;
+        }
     }
 
 
@@ -261,7 +269,7 @@ class Boss {
     constructor(canvas, ctx){
         this.canvas = canvas;
         this.ctx = ctx;
-        this.lives = 5;
+        this.lives = 10;
         this.size = {w: null, h: null};
         this.pos = {x: 0, y: 0};
         this.vel = {x: 0, y: 0};
