@@ -150,19 +150,19 @@ class Player {
         this.gameArea = gameArea;
         this.canvas = canvas;
         this.ctx = ctx;
-        this.size = {w: 64, h: 64};
-        this.fartSize = {w: 74, h: 74};
+        this.size = {w: 100, h: 141};
+        this.fartSize = {w: 60, h: 86};
         this.vel = {x:0, y:0};
         this.pos = {x: this.canvas.width / 2, y: this.canvas.height / 2};
         this.fartVel = {x:0, y:0};
-        this.fartPos = {x: this.canvas.width / 2 - this.size.w / 2, y: this.canvas.height / 2 - this.size.h / 2};
+        this.fartPos = {x: this.canvas.width / 2, y: this.canvas.height / 2};
         this.lives = 2;
         this.eff = new Image();
-        this.eff.src = './images/icecream-vendor.png';
+        this.eff.src = './images/eff.png';
         this.winEff = new Image();
-        this.winEff.src = './images/icecreamshop.png';
-        this.loseEff = new Image();
-        this.loseEff.src = './images/melted-icecream.png'
+        this.winEff.src = './images/eff-win.png.png';
+        this.fart = new Image();
+        this.fart.src = './images/fart.png';
     }
 
     drawPlayer() {
@@ -171,22 +171,25 @@ class Player {
             this.pos.y += this.vel.y;
             this.vel.y *= 0.99; 
             if (this.vel.y > - 0.5) {
-                this.vel.y = - 0.5
+                this.vel.y = - 0.5;
             }
             this.fartPos.y += this.fartVel.y;
-            this.fartVel.y *= 0.97;
-            this.fartSize.w += this.fartVel.y;
-            this.fartSize.h += this.fartVel.y;
+            this.fartVel.y *= 0.96;
+            if (this.fartVel.y < 0.5 && this.fartPos.y < this.canvas.height - 100) {
+                this.fartVel.y = 0.5;
+            }
+            this.fartSize.w += this.fartVel.y * 2;
+            this.fartSize.h += this.fartVel.y * 2;
         }
         if (this.gameArea.state === 'winning') {
-            this.ctx.drawImage(this.winEff, this.pos.x - this.size.w/2, this.pos.y - this.size.h/2, this.size.w, this.size.h);
+            this.ctx.drawImage(this.winEff, this.pos.x - this.size.w/2, this.pos.y - this.size.h/2, 200, 283);
         } else {
-            this.ctx.drawImage(this.eff, this.pos.x - this.size.w/2, this.pos.y - this.size.h, this.size.w, this.size.h);
+            this.ctx.drawImage(this.eff, this.pos.x - this.size.w/2, this.pos.y - this.size.h/2, this.size.w, this.size.h);
         } 
     }
 
     drawFart() {
-        this.ctx.drawImage(this.loseEff, this.fartPos.x - this.fartSize.w/2, this.fartPos.y - this.fartSize.h/2, this.fartSize.w, this.fartSize.h);
+        this.ctx.drawImage(this.fart, this.fartPos.x - this.fartSize.w/2 + 20, this.fartPos.y - this.fartSize.h/2, this.fartSize.w, this.fartSize.h);
     }
 
     checkCollision() {
@@ -194,7 +197,7 @@ class Player {
     }
 
     updateLives() {
-       this.lives -= 1; 
+        if(this.lives > 0) {this.lives -= 1; }
     }
 
     isDead() {
