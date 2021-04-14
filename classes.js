@@ -178,10 +178,12 @@ class Projectile {
         this.pos = {x: x, y: y};
         this.vel = velocity;
         this.eff = new Image();
-        this.eff.src = './images/icecream1.png';
+        this.num = Math.floor(Math.random() * 3 + 1);
+        this.eff.src = `./images/marshmallow${this.num}.png`;
     }
 
     drawProjectile() {
+    
         this.ctx.drawImage(this.eff, this.pos.x, this.pos.y, this.size.w, this.size.h);
     }
 
@@ -205,7 +207,8 @@ class Enemy {
         this.pos = {x: x, y: y};
         this.vel = velocity;
         this.eff = new Image();
-        this.eff.src = './images/marshmallow1.png';
+        this.num = Math.floor(Math.random() * 8 + 1);
+        this.eff.src = `./images/icecream${this.num}.png`;
     }
 
     drawEnemy() {
