@@ -14,6 +14,7 @@ class GameArea {
         this.enemies = [];
         this.wins = [];
         this.player = new Player (this.canvas, this.ctx, this);
+        this.sounds = new Sound(this);
     }
 
     initGame(){
@@ -25,6 +26,7 @@ class GameArea {
         trackLevels(this.level);
         trackLives(this.player.lives);
         trackScore(this.points);
+        this.sounds.makeBackgroundMusic();
 
     }
 
@@ -64,7 +66,7 @@ class GameArea {
             if (this.state === 'playing') {
                 this.enemies.push(new Enemy(this.canvas, this.ctx, x, y, velocity, this));
             }
-        }, 1000);  
+        }, 2000);  
     }
 
     spawnWins() {
@@ -128,6 +130,7 @@ class GameArea {
                 if (this.player.lives > 0) {
                     this.player.lives -= 1;
                     trackLives(this.player.lives);
+                    this.sounds.makeOuchSound(this);
                 } 
             }
             
@@ -153,33 +156,46 @@ class GameArea {
             this.level += 1;
             trackLevels(this.level);
         }
-        if (this.level >= 2) {
+        if (this.level >= 10) {
             this.winGame();
         }
     }
 
     stopGame() {
+        console.log('hihihihh')
         cancelAnimationFrame(this.rafId);
     }
 
     winGame(){
-        //this.stopGame();
         this.state = 'winning';
         this.spawnWins();
         
     }
 
     loseGame(){
-        //this.stopGame();
+        this.sounds.backgroundMusic.pause();
         this.state = 'dying';
         this.player.vel.y = -4;
+        this.sounds.makeFartSound();
         this.player.fartVel.y = 4;
 
     }
 
     resetGame(){
-        this.stopGame();
-        this.initGame();
+        this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
+        this.frames = 0;
+        this.level = 1;
+        this.points = 0;
+        this.player.lives = 10;
+        this.enemies = [];
+        this.projectiles = [];
+        this.wins = [];
+        this.player.pos = {x: this.canvas.width / 2, y: this.canvas.height / 2};
+        this.state = 'playing';
+        trackLives(this.player.lives);
+        trackScore(this.points);
+        trackLevels(this.level);
+        setTimeout(() => {this.initGame();}, 2000);
 
     }
 
@@ -331,6 +347,35 @@ class Win {
         this.drawWin();
         this.pos.x = this.pos.x + this.vel.x;
         this.pos.y = this.pos.y + this.vel.y;
+    }
+}
+
+class Sound {
+    constructor(gameArea) {
+        this.gameArea = gameArea;
+        this.ctx = gameArea.ctx;
+        this.backgroundMusic = new Audio("./sounds/DiscoConTutti.mp3");
+        this.backgroundMusic.volume = 0.1;
+        this.fartSound = new Audio("./sounds/fart.mp3");
+        this.fartSound.volume = 0.5;
+        this.ouchSound = new Audio("./sounds/ouch.mp3");
+        this.ouchSound.volume = 0.5;
+    }
+
+    makeBackgroundMusic() {
+        this.backgroundMusic.play();
+    }
+
+    makeFartSound() {
+        this.fartSound.play();
+    }
+
+    makeOuchSound() {
+        this.ouchSound.play();
+    }
+
+    makeWinSound() {
+
     }
 }
 

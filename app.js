@@ -35,9 +35,14 @@ if (startButton) {
       resetButton.setAttribute("id", "reset_button");
       resetButton.innerHTML = 'Reset';
       document.getElementById('header').appendChild(resetButton);
+      resetButton.addEventListener('click', e => {
+        gameArea.stopGame();
+        setTimeout(() => {gameArea.resetGame();}, 2000);
+      });
     }
   });
 }
+
 
 function sizeCanvasToParent () {
     const main = document.getElementById('main');

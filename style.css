@@ -127,7 +127,11 @@ color: #551a8b;
     font-family: 'Roboto Slab', serif;
     color: #551a8b;
     margin-left: 25%;
-    }
+}
+
+#reset_button:hover {
+    cursor: url('./images/cursor-ice-cream.png'), auto;
+}
 
 #start_button:hover {
     cursor: url('./images/cursor-ice-cream.png'), auto;
