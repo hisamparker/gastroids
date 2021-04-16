@@ -1,6 +1,3 @@
-//fonts     
-/* font-family: 'Montserrat', sans-serif;
-font-family: 'Roboto Slab', serif; */
 
 *,
 *::after,
@@ -11,14 +8,18 @@ font-family: 'Roboto Slab', serif; */
 body {
     display: grid;
     grid-template-columns: repeat(4, 1fr);
-    grid-template-rows: 10vw 40vw 10vw;
-    grid-gap: 1em;
+    grid-template-rows: 12vw 40vw 8vw;
+    /* grid-gap: 1em; */
     margin: 0 auto;
     max-width: 90%;
     padding: 1em 0;
 }
 
-body.isPlaying #start_button{
+body.isPlaying #start_button {
+    display: none;
+}
+
+body.isPlaying .intro {
     display: none;
 }
 
@@ -37,7 +38,6 @@ p {
     
 }
 
-header,
 main,
 aside,
 footer {
@@ -46,25 +46,39 @@ align-items: center;
 justify-content: center;
 }
 
-header,
 footer {
-grid-column: 1 / span 5;
-height: 10vw;
+    background-color: darkcyan;
+    grid-column: 1 / span 5;
+    height: 8vw;
 }
 
 header {
     background-color: cornflowerblue;
+    grid-column: 1 / span 5;
+    height: 12vw;
+    display: flex;
+    justify-content: center;
+    align-items: center;
 }
 
-footer {
-    background-color: darkcyan;
+.brand_wrapper {
+    height: 100%;
+}
+
+.brand_img {
+    height: 90%;
 }
 
 main {
 grid-column: 1 / span 3;
 background-color: linen;
-padding: 0;
 overflow: hidden;
+display: flex;
+flex-direction: column;
+font-size: 1.5rem;
+color: #551a8b;
+font-family: 'Montserrat', sans-serif;
+justify-content: center;
 }
 
 aside {
@@ -84,7 +98,8 @@ padding-bottom: 1rem;
 
 #start_button {
 width: 200px;
-height: 100px;
+height: 80px;
+margin-top: 3%;
 background-color: lightpink;
 border: 2px solid pink;
 display: flex;
@@ -94,10 +109,58 @@ text-decoration: none;
 font-size: 2rem;
 border-radius: 20px;
 font-family: 'Roboto Slab', serif;
+color: #551a8b;
+}
+
+#reset_button {
+    width: 200px;
+    height: 80px;
+    margin-top: 3%;
+    background-color: lightpink;
+    border: 2px solid pink;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    text-decoration: none;
+    font-size: 2rem;
+    border-radius: 20px;
+    font-family: 'Roboto Slab', serif;
+    color: #551a8b;
+    margin-left: 25%;
+    }
+
+#start_button:hover {
+    cursor: url('./images/cursor-ice-cream.png'), auto;
+}
+
+.intro__copy {
+    padding-bottom: 3%;
+    padding-left: 20%;
+    padding-right: 16%;
 }
 
 canvas {
     background-color: mediumblue;
+    cursor: url('./images/target5.png'), auto;	
+}
+
+.footer {
+    display: flex;
+    justify-content: start;
+    align-items: center;
+    color: white;
+    font-family: monospace;
+    padding-top: 1rem;
+}
+
+.logo_wrapper {
+    height: 100%;
+    padding-top: 1rem;
+    padding-left: 4rem;
+}
+
+.logo {
+    height: 100%;
 }
 
 @media (max-width: 1024px) {

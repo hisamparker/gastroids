@@ -10,28 +10,33 @@
     <title>gasteroids</title>
 </head>
 <body>
-    <header>
-        Header
+    <header id="header">
+        <div class="brand_wrapper"><img src="./images/gasteroids2.png" alt="Gasteroids" class="brand_img"></div>
     </header>
     <main id="main">
-        <a href="#" id="start_button">Start Game!</a>
+        <section class="intro intro__one">
+            <div class="intro__copy p_1">Charlie Mae is intolerant of all things created from the milk of a cow. </div> 
+            <div class="intro__copy p_2">She is also, most definitely, a vegetarian, whose diet primarily consists of marshmallows, bell peppers and pepperoni sticks.</div>
+        </section>
+        <button href="#" id="start_button" class="reading__1"> Next &#127846</button>
     </main>
     <aside class="container">
         <div class="score_container container">
             <h2>Score :</h2>
-            <p id="score">0</p>
+            <p id="score"></p>
         </div>
         <div class="lives_container container">
             <h2>Lives :</h2>
-            <p id="lives">10</p>
+            <p id="lives"></p>
         </div>
         <div class="level_container container">
             <h2>Level :</h2>
-            <p id="level">1</p>
+            <p id="level"></p>
         </div>
     </aside>
-    <footer>
-        Footer
+    <footer class="footer">
+        <div class="logo_wrapper"><img src="./images/eff-win.png" alt="logo" class="logo"></div>
+        <div class="slogan"><span>hi.sam</span></div>
     </footer>    
    <script src="classes.js"></script>
    <script src="app.js"></script>
