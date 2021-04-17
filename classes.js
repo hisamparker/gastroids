@@ -143,7 +143,9 @@ class GameArea {
                     this.points += 100;
                     trackScore(this.points);
                     this.boss.lives -= 1;
-                    console.log(this.boss.lives)
+                    this.boss.a > 0.2 ? this.boss.a -= 0.2 : this.boss.a = 0.2;
+                    this.boss.f += 30;
+                    console.log(this.boss.f)
                     setTimeout(() => {
                         this.projectiles.splice(index, 1);
                     }, 0);
@@ -477,23 +479,19 @@ class Boss {
         this.radians = 0;
         this.eff = new Image();
         this.eff.src = './images/icecream-truck.png';
+        this.a = 1;
+        this.f = 100;
     }
 
     drawBoss() {
+        
         if(this.lives > 0) {
-            if (this.lives < 10) {
-                this.ctx.globalAlpha = 0.9;
-                this.ctx.drawImage(this.eff, this.pos.x, this.pos.y, this.size.w, this.size.h);
-                this.ctx.globalAlpha = 1.0;
-            } else if (this.lives < 9) {
-                this.ctx.globalAlpha = 0.7;
-                this.ctx.drawImage(this.eff, this.pos.x, this.pos.y, this.size.w, this.size.h);
-                this.ctx.globalAlpha = 1.0;
-            } else if (this.lives < 8) {
-                this.ctx.globalAlpha = 0.9;
-                this.ctx.drawImage(this.eff, this.pos.x, this.pos.y, this.size.w, this.size.h);
-                this.ctx.globalAlpha = 1.0;
-            } else {this.ctx.drawImage(this.eff, this.pos.x, this.pos.y, this.size.w, this.size.h);}
+            this.ctx.globalAlpha = this.a;
+            this.ctx.filter = `brightness(${this.f}%)`;
+            this.ctx.drawImage(this.eff, this.pos.x, this.pos.y, this.size.w, this.size.h);
+            this.ctx.filter = `brightness(100%)`;
+            this.ctx.globalAlpha = 1.0;
+
             if (this.gameArea.frames % 225 === 0 ) {this.gameArea.spawnMissile();}
         }
     }
