@@ -9,7 +9,6 @@ body {
     display: grid;
     grid-template-columns: repeat(4, 1fr);
     grid-template-rows: 12vw 40vw 8vw;
-    /* grid-gap: 1em; */
     margin: 0 auto;
     max-width: 90%;
     padding: 1em 0;
@@ -172,6 +171,10 @@ canvas {
 main,
 aside {
     grid-column: 1 / span 5;
+}
+
+body {
+    grid-template-rows: 12vw 50vw 10vw 8vw;
 }
 
 .container {

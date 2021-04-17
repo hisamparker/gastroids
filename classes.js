@@ -13,8 +13,12 @@ class GameArea {
         this.projectiles = [];
         this.enemies = [];
         this.wins = [];
+        this.missiles = [];
         this.player = new Player (this.canvas, this.ctx, this);
         this.sounds = new Sound(this);
+        this.winIntervalId = null;
+        this.enemiesIntervalId = null;
+        this.boss = new Boss(this, this.canvas.width/2 - 25 , this.canvas.height/2 - 275);
     }
 
     initGame(){
@@ -46,8 +50,18 @@ class GameArea {
         this.projectiles.push(new Projectile(this.canvas, this.ctx, this.size.w/2, this.size.h/2, velocity));
     }
 
+    spawnMissile() {
+        const angle = Math.atan2(this.size.h / 2 - this.boss.pos.y, this.size.w / 2 - this.boss.pos.x);    
+        const velocity = {
+            x:Math.cos(angle),
+            y:Math.sin(angle)
+        };
+
+        this.missiles.push(new Missile(this, this.boss.pos.x, this.boss.pos.y, velocity));
+    }
+
     spawnEnemies() {
-        setInterval(() => {
+        this.enemiesIntervalId = setInterval(() => {
             let x, y;
             if (Math.random() < 0.5) {
                 x = Math.random() < 0.5 ? 0 - 20 : this.size.w + 20;
@@ -70,7 +84,7 @@ class GameArea {
     }
 
     spawnWins() {
-        setInterval(() => {
+        this.winIntervalId = setInterval(() => {
             let pointX, pointY;
             if (Math.random() < 0.5) {
                 pointX = Math.random() < 0.5 ? 0 - 20 : this.size.w + 20;
@@ -86,7 +100,7 @@ class GameArea {
                 y:Math.sin(angle)
             };
             this.wins.push(new Win(this, velocity));
-        }, 10);  
+        }, 100);  
     }
 
     updateGame(){
@@ -102,7 +116,13 @@ class GameArea {
         this.player.drawPlayer();
     
         this.frames += 1;
+        
         if(this.state === 'playing') {this.levelUp();}
+
+        if(this.state === 'playing' && this.level >= 2) {
+            this.boss.updateBoss();
+        }
+
 
         this.projectiles.forEach((projectile, index) => {
             projectile.update();
@@ -115,6 +135,19 @@ class GameArea {
                 setTimeout(() => {
                     this.projectiles.splice(index, 1);
                 }, 0);
+            }
+
+            const distance = Math.hypot(projectile.pos.x - this.boss.pos.x, projectile.pos.y - this.boss.pos.y); {
+                if (distance - this.boss.size.w/2 - projectile.size.w/2 < 1){
+                    this.sounds.makeBossHitSound();
+                    this.points += 100;
+                    trackScore(this.points);
+                    this.boss.lives -= 1;
+                    console.log(this.boss.lives)
+                    setTimeout(() => {
+                        this.projectiles.splice(index, 1);
+                    }, 0);
+                }
             }
         });
 
@@ -138,6 +171,7 @@ class GameArea {
             this.projectiles.forEach((projectile, projectileIndex) => {
                 const distance = Math.hypot(projectile.pos.x - enemy.pos.x, projectile.pos.y - enemy.pos.y); {
                     if (distance - enemy.size.w/2 - projectile.size.w/2 < 1){
+                        this.sounds.makeAchievementSound();
                         this.points += 10;
                         trackScore(this.points);
                         setTimeout(() => {
@@ -148,28 +182,61 @@ class GameArea {
                 }
             });
         });
+
+        this.missiles.forEach((missile, index) => {
+            missile.update();
+
+            const distance = Math.hypot(this.player.pos.x - missile.pos.x, this.player.pos.y - missile.pos.y); 
+            if (distance - missile.size.w/2 - this.player.size.w/2 < 1){
+                this.missiles.splice(index, 1);
+                if (this.player.lives <= 1) {
+                    this.loseGame();
+                }
+                if (this.player.lives > 0) {
+                    this.sounds.makeOuchSound();
+                    this.player.lives -= 1;
+                    trackLives(this.player.lives);
+                    this.sounds.makeOuchSound(this);
+                } 
+            }
+
+            //remove projectiles and missiles if they crash
+            this.projectiles.forEach((projectile, projectileIndex) => {
+                const distance = Math.hypot(projectile.pos.x - missile.pos.x, projectile.pos.y - missile.pos.y); {
+                    if (distance - missile.size.w/2 - projectile.size.w/2 < 1){
+                        this.sounds.makeAchievementSound();
+                        this.points += 50;
+                        trackScore(this.points);
+                        setTimeout(() => {
+                            this.missiles.splice(index, 1);
+                            this.projectiles.splice(projectileIndex, 1);
+                        }, 0);
+                    }
+                }
+            });
+        });
     
     }
 
     levelUp() {
-        if (this.frames % 500 === 0 && this.state === 'playing'){
+        if (this.frames % 750 === 0 && this.state === 'playing'){
             this.level += 1;
             trackLevels(this.level);
         }
-        if (this.level >= 10) {
+        if (this.level >= 3) {
             this.winGame();
         }
     }
 
     stopGame() {
-        console.log('hihihihh')
         cancelAnimationFrame(this.rafId);
     }
 
     winGame(){
+        this.sounds.backgroundMusic.pause();
+        this.sounds.makeWinSound();
         this.state = 'winning';
-        this.spawnWins();
-        
+        this.spawnWins();    
     }
 
     loseGame(){
@@ -190,7 +257,12 @@ class GameArea {
         this.enemies = [];
         this.projectiles = [];
         this.wins = [];
+        clearInterval(this.winIntervalId);
+        clearInterval(this.enemiesIntervalId);
         this.player.pos = {x: this.canvas.width / 2, y: this.canvas.height / 2};
+        this.player.fartSize = {w: 60, h: 86};
+        this.player.fartVel = {x:0, y:0};
+        this.player.fartPos = {x: this.canvas.width / 2, y: this.canvas.height / 2};
         this.state = 'playing';
         trackLives(this.player.lives);
         trackScore(this.points);
@@ -212,7 +284,7 @@ class Player {
         this.pos = {x: this.canvas.width / 2, y: this.canvas.height / 2};
         this.fartVel = {x:0, y:0};
         this.fartPos = {x: this.canvas.width / 2, y: this.canvas.height / 2};
-        this.lives = 2;
+        this.lives = 10;
         this.eff = new Image();
         this.eff.src = './images/eff.png';
         this.winEff = new Image();
@@ -282,8 +354,8 @@ class Projectile {
 
     update() {
         this.drawProjectile();
-        this.pos.x = this.pos.x + this.vel.x;
-        this.pos.y = this.pos.y + this.vel.y;
+        this.pos.x = this.pos.x + this.vel.x * 4;
+        this.pos.y = this.pos.y + this.vel.y * 4;
     }
 
 }
@@ -360,6 +432,12 @@ class Sound {
         this.fartSound.volume = 0.5;
         this.ouchSound = new Audio("./sounds/ouch.mp3");
         this.ouchSound.volume = 0.5;
+        this.achievementSound = new Audio("./sounds/achievement.mp3");
+        this.achievementSound.volume = 0.5;
+        this.winSound = new Audio("./sounds/cheer.mp3");
+        this.winSound.volume = 0.5;
+        this.hitBossAchievement = new Audio("./sounds/hit-boss.mp3");
+        this.hitBossAchievement.volume = 0.5;
     }
 
     makeBackgroundMusic() {
@@ -374,33 +452,86 @@ class Sound {
         this.ouchSound.play();
     }
 
-    makeWinSound() {
+    makeAchievementSound() {
+        this.achievementSound.play();
+    }
 
+    makeBossHitSound() {
+        this.hitBossAchievement.play();
+    }
+
+    makeWinSound() {
+        this.winSound.play();
     }
 }
 
 class Boss {
-    constructor(canvas, ctx){
-        this.canvas = canvas;
-        this.ctx = ctx;
+    constructor(gameArea, x, y) {
+        this.gameArea = gameArea;
+        this.canvas = gameArea.canvas;
+        this.ctx = gameArea.ctx;
         this.lives = 10;
-        this.size = {w: null, h: null};
-        this.pos = {x: 0, y: 0};
-        this.vel = {x: 0, y: 0};
+        this.size = {w: 64, h: 64};
+        this.pos = {x: x, y: y};
+        this.vel = 0.02;
+        this.radians = 0;
         this.eff = new Image();
-        this.eff.src = null;
+        this.eff.src = './images/icecream-truck.png';
     }
 
     drawBoss() {
-        this.ctx.drawImage(this.eff, this.pos.x, this.pos.y, this.size.w, this.size.h);
+        if(this.lives > 0) {
+            if (this.lives < 10) {
+                this.ctx.globalAlpha = 0.9;
+                this.ctx.drawImage(this.eff, this.pos.x, this.pos.y, this.size.w, this.size.h);
+                this.ctx.globalAlpha = 1.0;
+            } else if (this.lives < 9) {
+                this.ctx.globalAlpha = 0.7;
+                this.ctx.drawImage(this.eff, this.pos.x, this.pos.y, this.size.w, this.size.h);
+                this.ctx.globalAlpha = 1.0;
+            } else if (this.lives < 8) {
+                this.ctx.globalAlpha = 0.9;
+                this.ctx.drawImage(this.eff, this.pos.x, this.pos.y, this.size.w, this.size.h);
+                this.ctx.globalAlpha = 1.0;
+            } else {this.ctx.drawImage(this.eff, this.pos.x, this.pos.y, this.size.w, this.size.h);}
+            if (this.gameArea.frames % 225 === 0 ) {this.gameArea.spawnMissile();}
+        }
+    }
+
+    updateBoss() {
+        this.drawBoss();
+        //move position over time
+        this.radians += this.vel;
+        this.pos.x = this.pos.x + Math.cos(this.radians) * 7;
+        this.pos.y = this.pos.y + Math.sin(this.radians) * 5;
     }
 
     updateLives(){
         this.lives -= 1; 
      }
+}
 
-    isDead() {
-        return lives <= 0;
+class Missile {
+    constructor(gameArea, x, y, velocity){
+        this.gameArea = gameArea;
+        this.canvas = gameArea.canvas;
+        this.ctx = gameArea.ctx;
+        this.pos = {x: x, y: y};
+        this.size = {w: 36, h: 36};
+        this.vel = {x: velocity.x, y: velocity.y};
+        this.eff = new Image();
+        this.num = Math.floor(Math.random() * 3 + 1);
+        this.eff.src = `./images/missile${this.num}.png`;
+    }
+
+    drawMissile() {
+        this.ctx.drawImage(this.eff, this.pos.x, this.pos.y, this.size.w, this.size.h);
+    }
+
+    update() {
+        this.drawMissile();
+        this.pos.x = this.pos.x + this.vel.x;
+        this.pos.y = this.pos.y + this.vel.y;
     }
 }
 
