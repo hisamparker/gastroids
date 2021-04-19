@@ -32,7 +32,7 @@ class State {
                 this.enemySpawnRate -= 3;
             }
         }
-        if(this.frames === 60){this.gameArea.spawnEnemies();}
+        if(this.frames === 160){this.gameArea.spawnEnemies();}
         if(this.frames % this.enemySpawnRate === 0 && this.state === 'playing') {
             this.gameArea.spawnEnemies();
         }

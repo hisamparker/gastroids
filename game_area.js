@@ -12,16 +12,16 @@ class GameArea {
         this.enemies = [];
         this.wins = [];
         this.missiles = [];
-        this.player = new Player (this, 100, 141, this.size.w/2, this.size.h/2, {x: 0, y: 0}, [{url: './images/eff.png'}, {url: './images/eff-win.png'}]);
+        this.player = new Player (this, {w: 100, h: 141}, {x: this.size.w/2, y: this.size.h/2}, {x: 0, y: 0}, [{url: './images/eff.png'}, {url: './images/eff-win.png'}]);
         this.player.draw();
         this.sounds = new Sounds(this);
         this.winIntervalId = null;
         this.enemiesIntervalId = null;
-        this.boss = new Boss(this, 64, 64, this.size.w/2 - 25 , this.size.h/2 - 275, 0.02, [{url: './images/icecream-truck.png'}]);
-        if(this.state.state === 'playing' && this.state.level >= 8) {
+        this.boss = new Boss(this, {w: 64, h: 64}, {x: this.size.w/2 - 25 , y: this.size.h/2 - 275}, 0.02, [{url: './images/icecream-truck.png'}]);
+        if(this.state.state === 'playing' && this.state.level >= 2) {
             this.boss.draw();
         }
-        this.fart = new Fart(this, 60, 86, this.size.w/2, this.size.h/2 + this.player.size.h/2, {x: 0, y: 0}, [{url: './images/fart.png'}]);
+        this.fart = new Fart(this, {w: 60, h: 86}, {x: this.size.w/2, y: this.size.h/2 + this.player.size.h/2}, {x: 0, y: 0}, [{url: './images/fart.png'}]);
         if(this.state.state === 'losing') {this.fart.draw();}
 
     }
@@ -47,13 +47,13 @@ class GameArea {
         const pointX = e.clientX - rect.left;
         const angle = Math.atan2(pointY - this.size.h/2, pointX - this.size.w/2);
         const velocity = {
-            x:Math.cos(angle),
-            y:Math.sin(angle)
+            x:Math.cos(angle) * 4,
+            y:Math.sin(angle) * 4
         };
 
         let num = Math.floor(Math.random() * 4 + 1);
 
-        this.projectiles.push(new Projectile(this, 36, 36, this.size.w/2, this.size.h/2, velocity, [{url: `./images/marshmallow${num}.png`}]));
+        this.projectiles.push(new Actor(this, {w: 36, h: 36}, {x: this.size.w/2, y: this.size.h/2}, velocity, [{url: `./images/marshmallow${num}.png`}]));
     }
 
     spawnMissile() {
@@ -64,7 +64,8 @@ class GameArea {
         };
 
         let num = Math.floor(Math.random() * 2 + 1);
-        this.missiles.push(new Missile(this, 36, 36, this.boss.pos.x, this.boss.pos.y, velocity, [{url: `./images/missile${num}.png`}]));
+        this.missiles.push(new Actor(this, {w: 36, h: 36}, {x: this.boss.pos.x, y: this.boss.pos.y}, velocity, [{url: `./images/missile${num}.png`}]));
+        this.missiles[this.missiles.length - 1].fallWhenGameOver = true;
     }
 
     spawnEnemies() {
@@ -87,7 +88,8 @@ class GameArea {
 
             let num = Math.floor(Math.random() * 8 + 1);
             
-            this.enemies.push(new Enemy(this, 40, 40, x, y, velocity, [{url: `./images/icecream${num}.png`}]));
+            this.enemies.push(new Actor(this, {w: 40, h: 40}, {x: x, y: y}, velocity, [{url: `./images/icecream${num}.png`}]));
+            this.enemies[this.enemies.length - 1].fallWhenGameOver = true;
         }
     }
 
@@ -109,7 +111,7 @@ class GameArea {
             };
 
             let num = Math.floor(Math.random() * 8 + 1);
-            this.wins.push(new WinProjectile(this, 60, 46, this.size.w/2, this.size.h/2, velocity, [{url: `./images/win${num}.png`}]));
+            this.wins.push(new Actor(this, {w: 60, h: 46}, {x: this.size.w/2, y: this.size.h/2}, velocity, [{url: `./images/win${num}.png`}]));
         }, 50);  
     }
 
@@ -131,7 +133,7 @@ class GameArea {
         
         if(this.state.state === 'playing') {this.state.levelUp();}
 
-        if(this.state.state === 'playing' && this.state.level >= 8) {
+        if(this.state.state === 'playing' && this.state.level >= 2) {
             this.boss.update();
         }
 
@@ -150,13 +152,13 @@ class GameArea {
             }
 
             const distance = Math.hypot(projectile.pos.x - this.boss.pos.x, projectile.pos.y - this.boss.pos.y); {
-                if (distance - this.boss.size.w/2 - projectile.size.w/2 < 1 && this.state.level >= 8){
+                if (distance - this.boss.size.w/2 - projectile.size.w/2 < 1 && this.state.level >= 2){
                     this.sounds.makeBossHitSound();
                     this.state.points += 100;
                     trackScore(this.state.points);
                     this.boss.lives -= 1;
                     if(this.boss.lives === 0 && this.state.state !== 'losing') {this.state.win();} 
-                    this.boss.a > 0.2 ? this.boss.a -= 0.3 : this.boss.a = 0.3;
+                    this.boss.a > 0.3 ? this.boss.a -= 0.2 : this.boss.a = 0.3;
                     this.boss.f < 280 ? this.boss.f += 30 : this.boss.f = 280;
                     setTimeout(() => {
                         this.projectiles.splice(index, 1);
@@ -173,7 +175,6 @@ class GameArea {
                 this.enemies.splice(index, 1);
                 if (this.player.lives <= 1 && this.state.state !== 'winning') {
                     this.state.lose();
-                    console.log(this.state.state)
                 }
                 if (this.player.lives > 0) {
                     this.sounds.makeOuchSound(this);
@@ -255,6 +256,7 @@ class GameArea {
         this.player.pos = {x: this.size.w/2, y: this.size.h/2};
         this.boss.pos = {x: this.size.w/2 - 25, y:this.size.h/2 - 275};
         this.boss.radians = 0;
+        this.boss.lives = 10;
         this.boss.f = 100;
         this.boss.a = 1;
         this.fart.size = {w: 60, h: 86};

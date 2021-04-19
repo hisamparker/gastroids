@@ -1,10 +1,10 @@
 class Actor {
-    constructor(gameArea, w, h, x, y, velocity, sprites) {
+    constructor(gameArea, size, pos, velocity, sprites) {
         this.gameArea = gameArea;
         this.canvas = this.gameArea.canvas;
         this.ctx = gameArea.ctx;
-        this.size = {w: w, h: h};
-        this.pos = {x: x, y: y};
+        this.size = {w: size.w, h: size.h};
+        this.pos = {x: pos.x, y: pos.y};
         this.vel = {x: velocity.x, y: velocity.y};
         this.sprites = sprites;
         this.spriteIndex = 0;
@@ -12,6 +12,7 @@ class Actor {
             sprite.image = new Image();
             sprite.image.src = sprite.url; 
         }
+        this.fallWhenGameOver = false;
     }
 
     draw() {
@@ -20,7 +21,12 @@ class Actor {
 
     update() {
         this.draw();
-        this.pos.x = this.pos.x + this.vel.x;
-        this.pos.y = this.pos.y + this.vel.y;
+        if(this.fallWhenGameOver === true && (this.gameArea.state.state === 'losing' || this.gameArea.state.state === 'winning' || this.gameArea.state.state === 'final')){
+            this.pos.x = this.pos.x;
+            this.pos.y += 5;
+        } else {
+            this.pos.x = this.pos.x + this.vel.x;
+            this.pos.y = this.pos.y + this.vel.y;
+        }
     }
 }

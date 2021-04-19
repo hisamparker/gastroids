@@ -1,6 +1,6 @@
 class Boss extends Actor {
-    constructor(gameArea, w, h, x, y, vel, sprites) {
-        super(gameArea, w, h, x, y, {x: 0, y: 0}, sprites);
+    constructor(gameArea, size, pos, vel, sprites) {
+        super(gameArea, size, pos, vel, sprites);
         this.lives = 10;
         this.vel = vel;
         this.radians = 0;

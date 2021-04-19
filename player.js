@@ -1,6 +1,6 @@
 class Player extends Actor {
-    constructor(gameArea, w, h, x, y, velocity, sprites) {
-        super(gameArea, w, h, x, y, velocity, sprites);
+    constructor(gameArea, size, pos, velocity, sprites) {
+        super(gameArea, size, pos, velocity, sprites);
         this.lives = 10;   
     }
 
@@ -9,8 +9,8 @@ class Player extends Actor {
         if(this.gameArea.state.state === 'losing') {
             this.pos.y += this.vel.y;
             this.vel.y *= 0.99; 
-            if (this.vel.y > - 0.5) {
-                this.vel.y = - 0.5;
+            if (this.vel.y > - 0.75) {
+                this.vel.y = - 0.75;
             }
         }
     }

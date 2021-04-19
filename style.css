@@ -149,11 +149,31 @@ canvas {
 
 .footer {
     display: flex;
-    justify-content: start;
+    justify-content: space-between;
     align-items: center;
     color: white;
     font-family: monospace;
+}
+
+.footer__wrapper {
+    height: 100%;
+    display: flex;
+    justify-content: start;
+    align-items: center;
     padding-top: 1rem;
+}
+
+.credits {
+    margin-right: 1rem;
+}
+
+li a {
+    color: white;
+    text-decoration: none;
+}
+
+li a:hover {
+    color: lightskyblue;
 }
 
 .logo_wrapper {
