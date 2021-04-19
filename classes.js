@@ -163,9 +163,10 @@ class GameArea {
                     this.loseGame();
                 }
                 if (this.player.lives > 0) {
-                    this.player.lives -= 1;
-                    trackLives(this.player.lives);
                     this.sounds.makeOuchSound(this);
+                    this.player.lives -= 1;
+                    this.player.isWiggling = 80;
+                    trackLives(this.player.lives);
                 } 
             }
             
@@ -197,8 +198,8 @@ class GameArea {
                 if (this.player.lives > 0) {
                     this.sounds.makeOuchSound();
                     this.player.lives -= 1;
+                    this.player.isWiggling = 80;
                     trackLives(this.player.lives);
-                    this.sounds.makeOuchSound(this);
                 } 
             }
 
@@ -286,7 +287,7 @@ class Player {
         this.pos = {x: this.canvas.width / 2, y: this.canvas.height / 2};
         this.fartVel = {x:0, y:0};
         this.fartPos = {x: this.canvas.width / 2, y: this.canvas.height / 2};
-        this.lives = 10;
+        this.lives = 2;
         this.eff = new Image();
         this.eff.src = './images/eff.png';
         this.winEff = new Image();
@@ -295,9 +296,13 @@ class Player {
         this.fart.src = './images/fart.png';
         this.loseTextEff = new Image();
         this.loseTextEff.src = './images/cheese.png';
+        this.isWiggling = 0;
     }
 
     drawPlayer() {
+        if(this.isWiggling > 0) {
+            this.isWiggling--;
+        }
         if (this.gameArea.state === 'dying') {
             if(this.fartPos.y > 484) {
                 this.drawLoseText();
@@ -320,7 +325,9 @@ class Player {
         if (this.gameArea.state === 'winning') {
             this.ctx.drawImage(this.winEff, this.pos.x - 100, this.pos.y - 141.5, 200, 283);
         } else {
-            this.ctx.drawImage(this.eff, this.pos.x - this.size.w/2, this.pos.y - this.size.h/2, this.size.w, this.size.h);
+            let offsetX = Math.random() * (this.isWiggling/ 20);
+            let offsetY = Math.random() * (this.isWiggling/ 20);
+            this.ctx.drawImage(this.eff, this.pos.x - this.size.w/2 + offsetX, this.pos.y - this.size.h/2 + offsetY, this.size.w, this.size.h);
         } 
     }
 
