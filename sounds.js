@@ -29,6 +29,8 @@ class Sounds {
     }
 
     makeAchievementSound() {
+        this.achievementSound.pause();
+        this.achievementSound.currentTime = 0;
         this.achievementSound.play();
     }
 

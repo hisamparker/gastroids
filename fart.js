@@ -15,8 +15,8 @@ class Fart extends Actor {
             if (this.vel.y < 0.5 && this.pos.y < this.gameArea.canvas.height - 100) {
                 this.vel.y = 0.5;
             }
-            this.w += this.vel.y * 2;
-            this.h += this.vel.y * 2;
+            this.size.w += this.vel.y * 2;
+            this.size.h += this.vel.y * 2;
         }
     }
 }

@@ -15,7 +15,7 @@ class Actor {
     }
 
     draw() {
-        this.ctx.drawImage(this.sprites[this.spriteIndex].image, this.pos.x, this.pos.y, this.size.w, this.size.h);
+        this.ctx.drawImage(this.sprites[this.spriteIndex].image, this.pos.x - this.size.w/2, this.pos.y - this.size.h/2, this.size.w, this.size.h);
     }
 
     update() {

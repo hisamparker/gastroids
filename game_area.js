@@ -3,7 +3,8 @@ class GameArea {
         this.canvas = canvas;
         //check that canvas is compatible w/browser
         this.ctx = canvas.getContext ? canvas.getContext('2d') : alert('upgrade now bish.');
-        this.state = new States(this);
+        this.state = new State(this);
+        this.level = this.state.level;
         this.size = {w: this.canvas.width, h: this.canvas.height};
         this.rafId = null;
         //use arrays to create groupings of elements so that I can render them all at once (instead of one-by-one)
@@ -11,12 +12,17 @@ class GameArea {
         this.enemies = [];
         this.wins = [];
         this.missiles = [];
-        this.player = new Player (this, 100, 141, this.size.w/2 - 50, this.size.h/2 - 70.5, {x: 0, y: 0}, [{url: './images/eff.png'}, {url: './images/eff-win.png'}]);
+        this.player = new Player (this, 100, 141, this.size.w/2, this.size.h/2, {x: 0, y: 0}, [{url: './images/eff.png'}, {url: './images/eff-win.png'}]);
+        this.player.draw();
         this.sounds = new Sounds(this);
         this.winIntervalId = null;
         this.enemiesIntervalId = null;
         this.boss = new Boss(this, 64, 64, this.size.w/2 - 25 , this.size.h/2 - 275, 0.02, [{url: './images/icecream-truck.png'}]);
-        this.fart = new Fart(this, 60, 86, this.size.w / 2, this.size.h / 2, {x: 0, y: 0}, [{url: './images/fart.png'}]);
+        if(this.state.state === 'playing' && this.state.level >= 8) {
+            this.boss.draw();
+        }
+        this.fart = new Fart(this, 60, 86, this.size.w/2, this.size.h/2 + this.player.size.h/2, {x: 0, y: 0}, [{url: './images/fart.png'}]);
+        if(this.state.state === 'losing') {this.fart.draw();}
 
     }
 
@@ -24,7 +30,6 @@ class GameArea {
         //first request animation frame, only called once on updateGame
         requestAnimationFrame(() => this.updateGame());
         //calls spawn enemies once to kick of the interval
-        this.spawnEnemies();
         //display levels, lives, and score on start
         trackLevels(this.state.level);
         trackLives(this.player.lives);
@@ -47,6 +52,7 @@ class GameArea {
         };
 
         let num = Math.floor(Math.random() * 4 + 1);
+
         this.projectiles.push(new Projectile(this, 36, 36, this.size.w/2, this.size.h/2, velocity, [{url: `./images/marshmallow${num}.png`}]));
     }
 
@@ -62,28 +68,27 @@ class GameArea {
     }
 
     spawnEnemies() {
-        this.enemiesIntervalId = setInterval(() => {
-            if (this.state.state === 'playing') {
-                let x, y;
-                if (Math.random() < 0.5) {
-                    x = Math.random() < 0.5 ? 0 - 20 : this.size.w + 20;
-                    y = Math.random() * this.size.h;
-                } else {
-                    x = Math.random() * this.size.w;
-                    y = Math.random() < 0.5 ? 0 - 20 : this.size.h + 20;
-                } 
-                //to move towards an object take the end goal and subtract current location
-                const angle = Math.atan2(this.size.h / 2 - y, this.size.w / 2 - x);
-                
-                const velocity = {
-                x:Math.cos(angle),
-                y:Math.sin(angle)
-                };
+        if (this.state.state === 'playing') {
+            let x, y;
+            if (Math.random() < 0.5) {
+                x = Math.random() < 0.5 ? 0 - 20 : this.size.w + 20;
+                y = Math.random() * this.size.h;
+            } else {
+                x = Math.random() * this.size.w;
+                y = Math.random() < 0.5 ? 0 - 20 : this.size.h + 20;
+            } 
+            //to move towards an object take the end goal and subtract current location
+            const angle = Math.atan2(this.size.h / 2 - y, this.size.w / 2 - x);
+            
+            const velocity = {
+            x:Math.cos(angle),
+            y:Math.sin(angle)
+            };
 
-                let num = Math.floor(Math.random() * 8 + 1);
-                this.enemies.push(new Enemy(this, 40, 40, x, y, velocity, [{url: `./images/icecream${num}.png`}]));
-            }
-        }, 2000);  
+            let num = Math.floor(Math.random() * 8 + 1);
+            
+            this.enemies.push(new Enemy(this, 40, 40, x, y, velocity, [{url: `./images/icecream${num}.png`}]));
+        }
     }
 
     spawnWins() {
@@ -104,8 +109,8 @@ class GameArea {
             };
 
             let num = Math.floor(Math.random() * 8 + 1);
-            this.wins.push(new WinProjectile(this, 60, 46, this.size.w/2 - this.player.size.w/2, this.size.h/2 - this.player.size.h/2, velocity, [{url: `./images/win${num}.png`}]));
-        }, 100);  
+            this.wins.push(new WinProjectile(this, 60, 46, this.size.w/2, this.size.h/2, velocity, [{url: `./images/win${num}.png`}]));
+        }, 50);  
     }
 
     updateGame(){
@@ -117,14 +122,16 @@ class GameArea {
                 win.update();    
             });
         }
-        
-        this.player.draw();
+
+        this.player.update();
     
         this.state.frames += 1;
+
+        if(this.state.state === 'losing') {this.fart.update();}
         
         if(this.state.state === 'playing') {this.state.levelUp();}
 
-        if(this.state.state === 'playing' && this.state.level >= 2) {
+        if(this.state.state === 'playing' && this.state.level >= 8) {
             this.boss.update();
         }
 
@@ -143,13 +150,14 @@ class GameArea {
             }
 
             const distance = Math.hypot(projectile.pos.x - this.boss.pos.x, projectile.pos.y - this.boss.pos.y); {
-                if (distance - this.boss.size.w/2 - projectile.size.w/2 < 1){
+                if (distance - this.boss.size.w/2 - projectile.size.w/2 < 1 && this.state.level >= 8){
                     this.sounds.makeBossHitSound();
                     this.state.points += 100;
                     trackScore(this.state.points);
                     this.boss.lives -= 1;
-                    this.boss.a > 0.2 ? this.boss.a -= 0.2 : this.boss.a = 0.2;
-                    this.boss.f += 30;
+                    if(this.boss.lives === 0 && this.state.state !== 'losing') {this.state.win();} 
+                    this.boss.a > 0.2 ? this.boss.a -= 0.3 : this.boss.a = 0.3;
+                    this.boss.f < 280 ? this.boss.f += 30 : this.boss.f = 280;
                     setTimeout(() => {
                         this.projectiles.splice(index, 1);
                     }, 0);
@@ -163,8 +171,9 @@ class GameArea {
             const distance = Math.hypot(this.player.pos.x - enemy.pos.x, this.player.pos.y - enemy.pos.y);
             if (distance - enemy.size.w/2 - this.player.size.w/2 < 1 || distance - enemy.size.h/2 - this.player.size.h/2 < 1 ) {
                 this.enemies.splice(index, 1);
-                if (this.player.lives <= 1) {
+                if (this.player.lives <= 1 && this.state.state !== 'winning') {
                     this.state.lose();
+                    console.log(this.state.state)
                 }
                 if (this.player.lives > 0) {
                     this.sounds.makeOuchSound(this);
@@ -196,7 +205,7 @@ class GameArea {
             const distance = Math.hypot(this.player.pos.x - missile.pos.x, this.player.pos.y - missile.pos.y); 
             if (distance - missile.size.w/2 - this.player.size.w/2 < 1 || distance - missile.size.h/2 - this.player.size.h/2 < 1){
                 this.missiles.splice(index, 1);
-                if (this.player.lives <= 1) {
+                if (this.player.lives <= 1 && this.state.state !== 'winning') {
                     this.state.lose();
                 }
                 if (this.player.lives > 0) {
@@ -234,12 +243,20 @@ class GameArea {
         this.state.level = 1;
         this.state.points = 0;
         this.player.lives = 10;
+        this.player.vel = {x: 0, y: 0};
+        this.player.size = {w: 100, h: 141};
+        this.player.spriteIndex = 0;
         this.enemies = [];
         this.projectiles = [];
         this.wins = [];
+        this.missiles = [];
         clearInterval(this.winIntervalId);
         clearInterval(this.enemiesIntervalId);
         this.player.pos = {x: this.size.w/2, y: this.size.h/2};
+        this.boss.pos = {x: this.size.w/2 - 25, y:this.size.h/2 - 275};
+        this.boss.radians = 0;
+        this.boss.f = 100;
+        this.boss.a = 1;
         this.fart.size = {w: 60, h: 86};
         this.fart.vel = {x:0, y:0};
         this.fart.pos = {x: this.size.w/2, y: this.size.h/2};
