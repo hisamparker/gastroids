@@ -21,7 +21,7 @@ class Actor {
 
     update() {
         this.draw();
-        if(this.fallWhenGameOver === true && (this.gameArea.state.state === 'losing' || this.gameArea.state.state === 'winning' || this.gameArea.state.state === 'final')){
+        if(this.fallWhenGameOver && this.gameArea.state.state !== 'playing'){
             this.pos.x = this.pos.x;
             this.pos.y += 5;
         } else {

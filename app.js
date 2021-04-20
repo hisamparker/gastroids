@@ -44,29 +44,34 @@ if (startButton) {
 }
 
 
-function sizeCanvasToParent () {
-    const main = document.getElementById('main');
-    const width = main.offsetWidth;
-    const height = main.offsetHeight;
-    const canvas = document.getElementById('canvas');
-    canvas.setAttribute('width', width);
-    canvas.setAttribute('height', height);
+function sizeCanvasToParent() {
+  const main = document.getElementById('main');
+  const width = main.offsetWidth;
+  const height = main.offsetHeight;
+  const canvas = document.getElementById('canvas');
+  canvas.setAttribute('width', width);
+  canvas.setAttribute('height', height);
+
+  if(gameArea) {
+    gameArea.size.w = width;
+    gameArea.size.h = height;
+  }
 }
 
 //update canvas size to match main element
 window.onresize = sizeCanvasToParent;
 
-function trackScore (points) {
+function trackScore(points) {
   const score = document.getElementById('score');
   score.innerText = points;
 }
 
-function trackLives (lives) {
+function trackLives(lives) {
   const playerLives = document.getElementById('lives');
   playerLives.innerText = lives;
 }
 
-function trackLevels (level) {
+function trackLevels(level) {
   const levels = document.getElementById('level');
   levels.innerText = level;
 }

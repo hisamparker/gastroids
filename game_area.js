@@ -18,11 +18,7 @@ class GameArea {
         this.winIntervalId = null;
         this.enemiesIntervalId = null;
         this.boss = new Boss(this, {w: 64, h: 64}, {x: this.size.w/2 - 25 , y: this.size.h/2 - 275}, 0.02, [{url: './images/icecream-truck.png'}]);
-        if(this.state.state === 'playing' && this.state.level >= 5) {
-            this.boss.draw();
-        }
         this.fart = new Fart(this, {w: 60, h: 86}, {x: this.size.w/2, y: this.size.h/2 + this.player.size.h/2}, {x: 0, y: 0}, [{url: './images/fart.png'}]);
-        if(this.state.state === 'losing') {this.fart.draw();}
 
     }
 
@@ -123,8 +119,7 @@ class GameArea {
         const distance = this.calculateDistance(actor1, actor2);
         const actor1SmallestBoundary = Math.min(actor1.size.w, actor1.size.h);
         const actor2SmallestBoundary = Math.min(actor2.size.w, actor2.size.h);
-        console.log("distance : " +distance);
-        return (distance < Math.max(actor1SmallestBoundary, actor2SmallestBoundary)/2)
+        return (distance < Math.max(actor1SmallestBoundary, actor2SmallestBoundary)/2);
     }
 
     updateGame(){
@@ -141,11 +136,11 @@ class GameArea {
     
         this.state.frames += 1;
 
-        if(this.state.state === 'losing') {this.fart.update();}
+        if(this.state.state === 'losing') this.fart.update();
         
-        if(this.state.state === 'playing') {this.state.levelUp();}
+        if(this.state.state === 'playing') this.state.levelUp();
 
-        if(this.state.frames - this.state.framesAtLoss > 200 && this.state.state === 'losing') {this.state.final();}
+        if(this.state.frames - this.state.framesAtLoss > 200 && this.state.state === 'losing') this.state.final();
 
         if(this.state.state === 'playing' && this.state.level >= 5) {
             this.boss.update();

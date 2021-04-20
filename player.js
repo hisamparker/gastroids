@@ -6,6 +6,9 @@ class Player extends Actor {
 
     update() {
         this.draw();
+        if(this.gameArea.state.state === 'playing') {
+            this.pos = {x: this.gameArea.size.w/2, y: this.gameArea.size.h/2};
+        }
         if(this.gameArea.state.state === 'losing') {
             this.pos.y += this.vel.y;
             this.vel.y *= 0.99; 

@@ -8,10 +8,10 @@
 body {
     display: grid;
     grid-template-columns: repeat(4, 1fr);
-    grid-template-rows: 12vw 40vw 8vw;
+    grid-template-rows: 20vh 70vh 15vh;
     margin: 0 auto;
-    max-width: 90%;
-    padding: 1em 0;
+    max-width: 100%;
+    padding: 0;
 }
 
 body.isPlaying #start_button {
@@ -52,13 +52,11 @@ justify-content: center;
 footer {
     background-color: darkcyan;
     grid-column: 1 / span 5;
-    height: 8vw;
 }
 
 header {
     background-color: cornflowerblue;
     grid-column: 1 / span 5;
-    height: 12vw;
     display: flex;
     justify-content: center;
     align-items: center;
@@ -66,6 +64,7 @@ header {
 
 .brand_wrapper {
     height: 100%;
+    padding: 1rem;
 }
 
 .brand_img {
@@ -82,7 +81,6 @@ main {
     color: #551a8b;
     font-family: 'Montserrat', sans-serif;
     justify-content: center;
-    /* position: relative; */
 }
 
 aside {
@@ -114,8 +112,6 @@ aside {
     border-radius: 20px;
     font-family: 'Roboto Slab', serif;
     color: #551a8b;
-    /* position: absolute; */
-    /* bottom: 60px; */
 }
 
 #reset_button {
