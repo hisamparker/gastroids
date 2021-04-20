@@ -172,7 +172,7 @@ class GameArea {
         this.enemies.forEach((enemy, index) => {
             enemy.update();
     
-            const distance = Math.hypot(this.player.pos.x - enemy.pos.x, this.player.pos.y - enemy.pos.y);
+            const distance = Math.hypot((this.player.pos.x) - (enemy.pos.x - enemy.size.w/2), (this.player.pos.y)  - (enemy.pos.y- enemy.size.h/2));
             if (distance - enemy.size.w/2 - this.player.size.w/2 < 1 || distance - enemy.size.h/2 - this.player.size.h/2 < 1 ) {
                 this.enemies.splice(index, 1);
                 if (this.player.lives <= 1 && this.state.state !== 'winning') {
