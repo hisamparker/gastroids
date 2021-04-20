@@ -4,6 +4,7 @@ class State {
         this.canvas = gameArea.canvas;
         this.ctx = gameArea.ctx;
         this.frames = 0;
+        this.framesAtLoss = 0;
         this.points = 0;
         this.level = 1;
         this.enemySpawnRate = 60;
@@ -26,7 +27,7 @@ class State {
         if (this.frames % 750 === 0 && this.state === 'playing'){
             this.level += 1;
             trackLevels(this.level);
-            if(this.level >= 8 && this.state === 'playing') {
+            if(this.level >= 4 && this.state === 'playing') {
                 this.enemySpawnRate = 60;
             } else {
                 this.enemySpawnRate -= 3;
@@ -51,6 +52,7 @@ class State {
     }
 
     lose(){
+        this.framesAtLoss = this.frames;
         clearInterval(this.gameArea.winIntervalId);
         clearInterval(this.gameArea.enemiesIntervalId);
         this.gameArea.sounds.backgroundMusic.pause();

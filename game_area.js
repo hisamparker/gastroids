@@ -18,7 +18,7 @@ class GameArea {
         this.winIntervalId = null;
         this.enemiesIntervalId = null;
         this.boss = new Boss(this, {w: 64, h: 64}, {x: this.size.w/2 - 25 , y: this.size.h/2 - 275}, 0.02, [{url: './images/icecream-truck.png'}]);
-        if(this.state.state === 'playing' && this.state.level >= 2) {
+        if(this.state.state === 'playing' && this.state.level >= 5) {
             this.boss.draw();
         }
         this.fart = new Fart(this, {w: 60, h: 86}, {x: this.size.w/2, y: this.size.h/2 + this.player.size.h/2}, {x: 0, y: 0}, [{url: './images/fart.png'}]);
@@ -115,6 +115,18 @@ class GameArea {
         }, 50);  
     }
 
+    calculateDistance (actor1, actor2) {
+        return Math.hypot((actor1.pos.x ) - (actor2.pos.x ), (actor1.pos.y )  - (actor2.pos.y ));
+    }
+
+    collisionDetected (actor1, actor2) {
+        const distance = this.calculateDistance(actor1, actor2);
+        const actor1SmallestBoundary = Math.min(actor1.size.w, actor1.size.h);
+        const actor2SmallestBoundary = Math.min(actor2.size.w, actor2.size.h);
+        console.log("distance : " +distance);
+        return (distance < Math.max(actor1SmallestBoundary, actor2SmallestBoundary)/2)
+    }
+
     updateGame(){
         this.rafId = requestAnimationFrame(() => this.updateGame());
         this.ctx.clearRect(0, 0, this.size.w, this.size.h);
@@ -133,9 +145,9 @@ class GameArea {
         
         if(this.state.state === 'playing') {this.state.levelUp();}
 
-        if(this.state.frames > 1200 && this.state.state === 'losing' && this.fart) {this.state.final();}
+        if(this.state.frames - this.state.framesAtLoss > 200 && this.state.state === 'losing') {this.state.final();}
 
-        if(this.state.state === 'playing' && this.state.level >= 2) {
+        if(this.state.state === 'playing' && this.state.level >= 5) {
             this.boss.update();
         }
 
@@ -153,27 +165,24 @@ class GameArea {
                 }, 0);
             }
 
-            const distance = Math.hypot(projectile.pos.x - this.boss.pos.x, projectile.pos.y - this.boss.pos.y); {
-                if (distance - this.boss.size.w/2 - projectile.size.w/2 < 1 && this.state.level >= 2){
-                    this.sounds.makeBossHitSound();
-                    this.state.points += 100;
-                    trackScore(this.state.points);
-                    this.boss.lives -= 1;
-                    if(this.boss.lives === 0 && this.state.state !== 'losing') {this.state.win();} 
-                    this.boss.a > 0.3 ? this.boss.a -= 0.2 : this.boss.a = 0.3;
-                    this.boss.f < 280 ? this.boss.f += 30 : this.boss.f = 280;
-                    setTimeout(() => {
-                        this.projectiles.splice(index, 1);
-                    }, 0);
-                }
+            if (this.collisionDetected(projectile, this.boss)){
+                this.sounds.makeBossHitSound();
+                this.state.points += 100;
+                trackScore(this.state.points);
+                this.boss.lives -= 1;
+                if(this.boss.lives === 0 && this.state.state !== 'losing') {this.state.win();} 
+                this.boss.a > 0.3 ? this.boss.a -= 0.2 : this.boss.a = 0.3;
+                this.boss.f < 280 ? this.boss.f += 30 : this.boss.f = 280;
+                setTimeout(() => {
+                    this.projectiles.splice(index, 1);
+                }, 0);        
             }
         });
 
         this.enemies.forEach((enemy, index) => {
             enemy.update();
     
-            const distance = Math.hypot((this.player.pos.x + this.player.size.w/2) - (enemy.pos.x + enemy.size.w/2), (this.player.pos.y + this.player.size.h/2)  - (enemy.pos.y + enemy.size.h/2));
-            if (distance - enemy.size.w/2 - this.player.size.w/2 < 1 || distance - enemy.size.h/2 - this.player.size.h/2 < 1 ) {
+            if (this.collisionDetected(this.player, enemy)) {
                 this.enemies.splice(index, 1);
                 if (this.player.lives <= 1 && this.state.state !== 'winning') {
                     this.state.lose();
@@ -188,16 +197,14 @@ class GameArea {
             
             //remove projectiles and enemies if they crash
             this.projectiles.forEach((projectile, projectileIndex) => {
-                const distance = Math.hypot(projectile.pos.x - enemy.pos.x, projectile.pos.y - enemy.pos.y); {
-                    if (distance - enemy.size.w/2 - projectile.size.w/2 < 1){
-                        this.sounds.makeAchievementSound();
-                        this.state.points += 10;
-                        trackScore(this.state.points);
-                        setTimeout(() => {
-                            this.enemies.splice(index, 1);
-                            this.projectiles.splice(projectileIndex, 1);
-                        }, 0);
-                    }
+                if (this.collisionDetected(projectile, enemy)){
+                    this.sounds.makeAchievementSound();
+                    this.state.points += 10;
+                    trackScore(this.state.points);
+                    setTimeout(() => {
+                        this.enemies.splice(index, 1);
+                        this.projectiles.splice(projectileIndex, 1);
+                    }, 0);
                 }
             });
         });
@@ -205,8 +212,7 @@ class GameArea {
         this.missiles.forEach((missile, index) => {
             missile.update();
 
-            const distance = Math.hypot(this.player.pos.x - missile.pos.x, this.player.pos.y - missile.pos.y); 
-            if (distance - missile.size.w/2 - this.player.size.w/2 < 1 || distance - missile.size.h/2 - this.player.size.h/2 < 1){
+            if (this.collisionDetected(this.player, missile)){
                 this.missiles.splice(index, 1);
                 if (this.player.lives <= 1 && this.state.state !== 'winning') {
                     this.state.lose();
@@ -220,16 +226,14 @@ class GameArea {
 
             //remove projectiles and missiles if they crash
             this.projectiles.forEach((projectile, projectileIndex) => {
-                const distance = Math.hypot(projectile.pos.x - missile.pos.x, projectile.pos.y - missile.pos.y); {
-                    if (distance - missile.size.w/2 - projectile.size.w/2 < 1){
-                        this.sounds.makeAchievementSound();
-                        this.state.points += 50;
-                        trackScore(this.state.points);
-                        setTimeout(() => {
-                            this.missiles.splice(index, 1);
-                            this.projectiles.splice(projectileIndex, 1);
-                        }, 0);
-                    }
+                if (this.collisionDetected(projectile, missile)){
+                    this.sounds.makeAchievementSound();
+                    this.state.points += 50;
+                    trackScore(this.state.points);
+                    setTimeout(() => {
+                        this.missiles.splice(index, 1);
+                        this.projectiles.splice(projectileIndex, 1);
+                    }, 0);
                 }
             });
         });
