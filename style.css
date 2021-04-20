@@ -81,8 +81,8 @@ main {
     font-size: 1.5rem;
     color: #551a8b;
     font-family: 'Montserrat', sans-serif;
-    justify-content: space-evenly;
-    position: relative;
+    justify-content: center;
+    /* position: relative; */
 }
 
 aside {
@@ -114,8 +114,8 @@ aside {
     border-radius: 20px;
     font-family: 'Roboto Slab', serif;
     color: #551a8b;
-    position: absolute;
-    bottom: 40px;
+    /* position: absolute; */
+    /* bottom: 60px; */
 }
 
 #reset_button {
@@ -150,7 +150,7 @@ aside {
 }
 
 .intro {
-    margin-bottom: 8rem;
+    min-height: 230px;
 }
 
 canvas {
