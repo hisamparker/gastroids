@@ -133,6 +133,8 @@ class GameArea {
         
         if(this.state.state === 'playing') {this.state.levelUp();}
 
+        if(this.state.frames > 1200 && this.state.state === 'losing' && this.fart) {this.state.final();}
+
         if(this.state.state === 'playing' && this.state.level >= 2) {
             this.boss.update();
         }
