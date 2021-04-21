@@ -157,7 +157,7 @@ class GameArea {
                 }, 0);
             }
 
-            if (this.collisionDetected(projectile, this.boss)){
+            if (this.collisionDetected(projectile, this.boss) && this.state.level >=5){
                 this.sounds.makeBossHitSound();
                 this.state.points += 100;
                 trackScore(this.state.points);
