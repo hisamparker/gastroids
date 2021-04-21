@@ -52,19 +52,26 @@ justify-content: center;
 footer {
     background-color: darkcyan;
     grid-column: 1 / span 5;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    color: white;
+    font-family: monospace;
 }
 
 header {
     background-color: cornflowerblue;
     grid-column: 1 / span 5;
     display: flex;
-    justify-content: center;
+    justify-content: space-between;
     align-items: center;
+    padding-right: 1rem;
+    padding-left: 1rem;
 }
 
 .brand_wrapper {
-    height: 100%;
-    padding: 1rem;
+    height: 90%;
+    margin: 1rem;
 }
 
 .brand_img {
@@ -115,8 +122,8 @@ aside {
 }
 
 #reset_button {
-    width: 200px;
-    height: 80px;
+    width: 175px;
+    height: 75px;
     margin-top: 3%;
     background-color: lightpink;
     border: 2px solid pink;
@@ -128,7 +135,7 @@ aside {
     border-radius: 20px;
     font-family: 'Roboto Slab', serif;
     color: #551a8b;
-    margin-left: 25%;
+    margin-bottom: 1rem;
 }
 
 #reset_button:hover {
@@ -154,24 +161,21 @@ canvas {
     cursor: url('./images/target5.png'), auto;	
 }
 
-.footer {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    color: white;
-    font-family: monospace;
-}
-
 .footer__wrapper {
     height: 100%;
     display: flex;
     justify-content: start;
     align-items: center;
-    padding-top: 1rem;
 }
 
 .credits {
     margin-right: 1rem;
+    display: flex;
+}
+
+.credits__list li:first-of-type {
+    list-style: none;
+    font-weight: bold;
 }
 
 li a {
@@ -184,8 +188,9 @@ li a:hover {
 }
 
 .logo_wrapper {
+    max-width: 150px;
     height: 100%;
-    padding-top: 1rem;
+    margin-top: 1.5rem;
     padding-left: 4rem;
 }
 
@@ -193,7 +198,7 @@ li a:hover {
     height: 100%;
 }
 
-@media only screen and (max-width: 1024px) {
+@media only screen and (max-width: 1200px) {
 
     main,
     aside {
@@ -201,7 +206,7 @@ li a:hover {
     }
 
     body {
-        grid-template-rows: 12vw 50vw 10vw 8vw;
+        grid-template-rows: 15vh 70vh 15vh 15vh;
     }
 
     .container {
@@ -214,9 +219,13 @@ li a:hover {
         padding: 1rem;
     }
 
+    #reset_button {
+        margin-left: 30%;
+    }
+
 }
 
-@media only screen and (max-width: 1020px) {
+@media only screen and (max-width: 1000px) {
     body {
         padding: 0;
         margin: 0;
@@ -227,9 +236,9 @@ li a:hover {
         justify-content: center;
         align-items: center;
         position: absolute;
-        z-index: 1000;
-        width: 100vw;
-        height: 100vh;
+        z-index: 1;
+        width: 100%;
+        height: 100%;
         background-color: #551a8b;
         color: white;
         font-family: 'Roboto Slab', serif;

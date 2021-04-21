@@ -13,7 +13,6 @@ class GameArea {
         this.wins = [];
         this.missiles = [];
         this.player = new Player (this, {w: 100, h: 141}, {x: this.size.w/2, y: this.size.h/2}, {x: 0, y: 0}, [{url: './images/eff.png'}, {url: './images/eff-win.png'}]);
-        this.player.draw();
         this.sounds = new Sounds(this);
         this.winIntervalId = null;
         this.enemiesIntervalId = null;
@@ -25,13 +24,24 @@ class GameArea {
     initGame(){
         //first request animation frame, only called once on updateGame
         requestAnimationFrame(() => this.updateGame());
-        //calls spawn enemies once to kick of the interval
         //display levels, lives, and score on start
         trackLevels(this.state.level);
         trackLives(this.player.lives);
         trackScore(this.state.points);
+        this.player.draw();
         this.sounds.makeBackgroundMusic();
 
+    }
+
+    calculateDistance (actor1, actor2) {
+        return Math.hypot((actor1.pos.x ) - (actor2.pos.x ), (actor1.pos.y )  - (actor2.pos.y ));
+    }
+
+    collisionDetected (actor1, actor2) {
+        const distance = this.calculateDistance(actor1, actor2);
+        const actor1SmallestBoundary = Math.min(actor1.size.w, actor1.size.h);
+        const actor2SmallestBoundary = Math.min(actor2.size.w, actor2.size.h);
+        return (distance < Math.max(actor1SmallestBoundary, actor2SmallestBoundary)/2);
     }
 
     //called in app.js, on click, new projectiles are spawned, click event is passed to func to get click position
@@ -41,19 +51,22 @@ class GameArea {
         //the event position is relative to the entire viewport, rect.top is equal to the difference btw the top of the vp and the top of the (main)element surrounding my canvas, so I need to subtract that from e.clientY to get click event position relative to my canvas (client left gets the diff btw the left of the vp and the left of my element)
         const pointY = e.clientY - rect.top;
         const pointX = e.clientX - rect.left;
+        //find the angle in radians btw  the ray from 0,0 and the click at x and the click at y
         const angle = Math.atan2(pointY - this.size.h/2, pointX - this.size.w/2);
         const velocity = {
+            //cos and sin accept radians, cos is the ratio of the adjacent side to the hypotenuse, sin is the ratio of the opposite side to the hypotenuse, ensures that projectiles will move towards the mouse click
             x:Math.cos(angle) * 4,
             y:Math.sin(angle) * 4
         };
 
+        //randomizing which png is used to populate the projectiles array
         let num = Math.floor(Math.random() * 4 + 1);
 
         this.projectiles.push(new Actor(this, {w: 36, h: 36}, {x: this.size.w/2, y: this.size.h/2}, velocity, [{url: `./images/marshmallow${num}.png`}]));
     }
 
     spawnMissile() {
-        const angle = Math.atan2(this.size.h / 2 - this.boss.pos.y, this.size.w / 2 - this.boss.pos.x);    
+        const angle = Math.atan2(this.size.h/2 - this.boss.pos.y, this.size.w/2 - this.boss.pos.x);    
         const velocity = {
             x:Math.cos(angle),
             y:Math.sin(angle)
@@ -61,12 +74,14 @@ class GameArea {
 
         let num = Math.floor(Math.random() * 2 + 1);
         this.missiles.push(new Actor(this, {w: 36, h: 36}, {x: this.boss.pos.x, y: this.boss.pos.y}, velocity, [{url: `./images/missile${num}.png`}]));
+        //make sure enemy falls when the game is over by toggling the fall property to true
         this.missiles[this.missiles.length - 1].fallWhenGameOver = true;
     }
 
     spawnEnemies() {
         if (this.state.state === 'playing') {
             let x, y;
+            //randomize where enemies are spawned, if the random number is less than 0.5, we do some extra randomization on the x coord (if second random num is less than five enemies spawn from the left of the canvas, else they spawn from the right of the canvas) if the first random num is greater than 0.5 we do the same for the y coord 
             if (Math.random() < 0.5) {
                 x = Math.random() < 0.5 ? 0 - 20 : this.size.w + 20;
                 y = Math.random() * this.size.h;
@@ -75,7 +90,7 @@ class GameArea {
                 y = Math.random() < 0.5 ? 0 - 20 : this.size.h + 20;
             } 
             //to move towards an object take the end goal and subtract current location
-            const angle = Math.atan2(this.size.h / 2 - y, this.size.w / 2 - x);
+            const angle = Math.atan2(this.size.h/2 - y, this.size.w/2 - x);
             
             const velocity = {
             x:Math.cos(angle),
@@ -111,17 +126,6 @@ class GameArea {
         }, 50);  
     }
 
-    calculateDistance (actor1, actor2) {
-        return Math.hypot((actor1.pos.x ) - (actor2.pos.x ), (actor1.pos.y )  - (actor2.pos.y ));
-    }
-
-    collisionDetected (actor1, actor2) {
-        const distance = this.calculateDistance(actor1, actor2);
-        const actor1SmallestBoundary = Math.min(actor1.size.w, actor1.size.h);
-        const actor2SmallestBoundary = Math.min(actor2.size.w, actor2.size.h);
-        return (distance < Math.max(actor1SmallestBoundary, actor2SmallestBoundary)/2);
-    }
-
     updateGame(){
         this.rafId = requestAnimationFrame(() => this.updateGame());
         this.ctx.clearRect(0, 0, this.size.w, this.size.h);
@@ -133,19 +137,11 @@ class GameArea {
         }
 
         this.player.update();
-    
         this.state.frames += 1;
-
-        if(this.state.state === 'losing') this.fart.update();
-        
         if(this.state.state === 'playing') this.state.levelUp();
-
+        if(this.state.state === 'playing' && this.state.level >= 5) this.boss.update();
         if(this.state.frames - this.state.framesAtLoss > 200 && this.state.state === 'losing') this.state.final();
-
-        if(this.state.state === 'playing' && this.state.level >= 5) {
-            this.boss.update();
-        }
-
+        if(this.state.state === 'losing') this.fart.update();
 
         this.projectiles.forEach((projectile, index) => {
             projectile.update();
@@ -155,6 +151,7 @@ class GameArea {
                 projectile.pos.x - projectile.size.w > this.size.w || 
                 projectile.y + projectile.size.h < 0 || 
                 projectile.y - projectile.size.h > this.size.h) {
+                //this is weird, but without it there's a little flickery flash thing that happens when they're removed
                 setTimeout(() => {
                     this.projectiles.splice(index, 1);
                 }, 0);
@@ -165,7 +162,8 @@ class GameArea {
                 this.state.points += 100;
                 trackScore(this.state.points);
                 this.boss.lives -= 1;
-                if(this.boss.lives === 0 && this.state.state !== 'losing') {this.state.win();} 
+                if(this.boss.lives === 0 && this.state.state !== 'losing') this.state.win();
+                //change the opacity and brightness of boss when injured (but not so much that it disappears)
                 this.boss.a > 0.3 ? this.boss.a -= 0.2 : this.boss.a = 0.3;
                 this.boss.f < 280 ? this.boss.f += 30 : this.boss.f = 280;
                 setTimeout(() => {
@@ -209,9 +207,7 @@ class GameArea {
 
             if (this.collisionDetected(this.player, missile)){
                 this.missiles.splice(index, 1);
-                if (this.player.lives <= 1 && this.state.state !== 'winning') {
-                    this.state.lose();
-                }
+                if (this.player.lives <= 1 && this.state.state !== 'winning') this.state.lose();
                 if (this.player.lives > 0) {
                     this.sounds.makeOuchSound();
                     this.player.lives -= 1;
@@ -241,34 +237,36 @@ class GameArea {
 
     resetGame(){
         this.stopGame();
-        this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
+        this.ctx.clearRect(0, 0, this.size.w, this.size.h);
+        clearInterval(this.winIntervalId);
+        clearInterval(this.enemiesIntervalId);
         this.state.frames = 0;
+        this.state.framesAtLoss = 0;
+        this.state.enemySpawnRate = 60;
         this.state.level = 1;
         this.state.points = 0;
+        this.state.state = 'playing';
+        this.projectiles = [];
+        this.wins = [];
+        this.missiles = [];
+        this.enemies = [];
         this.player.lives = 10;
         this.player.vel = {x: 0, y: 0};
         this.player.size = {w: 100, h: 141};
         this.player.spriteIndex = 0;
-        this.enemies = [];
-        this.projectiles = [];
-        this.wins = [];
-        this.missiles = [];
-        clearInterval(this.winIntervalId);
-        clearInterval(this.enemiesIntervalId);
         this.player.pos = {x: this.size.w/2, y: this.size.h/2};
-        this.boss.pos = {x: this.size.w/2 - 25, y:this.size.h/2 - 275};
         this.boss.radians = 0;
         this.boss.lives = 10;
         this.boss.f = 100;
         this.boss.a = 1;
+        this.boss.pos = {x: this.size.w/2 - 25, y:this.size.h/2 - 275};
         this.fart.size = {w: 60, h: 86};
         this.fart.vel = {x:0, y:0};
         this.fart.pos = {x: this.size.w/2, y: this.size.h/2};
-        this.state.state = 'playing';
         trackLives(this.player.lives);
         trackScore(this.state.points);
         trackLevels(this.state.level);
-        setTimeout(() => {this.initGame();}, 2000);
+        setTimeout(() => this.initGame(), 2000);
 
     }
 

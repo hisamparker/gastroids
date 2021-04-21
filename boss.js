@@ -16,7 +16,7 @@ class Boss extends Actor {
             this.ctx.filter = `brightness(100%)`;
             this.ctx.globalAlpha = 1.0;
 
-            if (this.gameArea.state.frames % 225 === 0 ) {this.gameArea.spawnMissile();}
+            if (this.gameArea.state.frames % 175 === 0 ) this.gameArea.spawnMissile();
         }
     }
 
