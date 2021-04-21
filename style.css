@@ -122,7 +122,7 @@ aside {
 }
 
 #reset_button {
-    width: 175px;
+    min-width: 175px;
     height: 75px;
     margin-top: 3%;
     background-color: lightpink;
@@ -136,6 +136,7 @@ aside {
     font-family: 'Roboto Slab', serif;
     color: #551a8b;
     margin-bottom: 1rem;
+    margin-right: 5%;
 }
 
 #reset_button:hover {
@@ -219,9 +220,9 @@ li a:hover {
         padding: 1rem;
     }
 
-    #reset_button {
+    /* #reset_button {
         margin-left: 30%;
-    }
+    } */
 
 }
 
