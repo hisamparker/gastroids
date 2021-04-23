@@ -18,7 +18,6 @@ class GameArea {
         this.enemiesIntervalId = null;
         this.boss = new Boss(this, {w: 64, h: 64}, {x: this.size.w/2 - 25 , y: this.size.h/2 - 275}, 0.02, [{url: './images/icecream-truck.png'}]);
         this.fart = new Fart(this, {w: 60, h: 86}, {x: this.size.w/2, y: this.size.h/2 + this.player.size.h/2}, {x: 0, y: 0}, [{url: './images/fart.png'}]);
-
     }
 
     initGame(){
@@ -139,7 +138,10 @@ class GameArea {
         this.player.update();
         this.state.frames += 1;
         if(this.state.state === 'playing') this.state.levelUp();
-        if(this.state.state === 'playing' && this.state.level >= 5) this.boss.update();
+        if(this.state.state === 'playing' && this.state.level >= 5) {
+            this.boss.update();
+            this.state.bossLevel +=1;
+        }
         if(this.state.frames - this.state.framesAtLoss > 200 && this.state.state === 'losing') this.state.final();
         if(this.state.state === 'losing') this.fart.update();
 

@@ -7,6 +7,7 @@ class State {
         this.framesAtLoss = 0;
         this.points = 0;
         this.level = 1;
+        this.bossLevel = 0;
         this.enemySpawnRate = 60;
         this.state = 'playing';
         this.winSprite = new Image();
@@ -24,6 +25,9 @@ class State {
     }
 
     levelUp() {
+        if(this.level === 5 && this.bossLevel === 1) {
+            this.gameArea.sounds.makeGalactoseSound();
+        }
         if (this.frames % 750 === 0 && this.state === 'playing'){
             this.level += 1;
             trackLevels(this.level);
@@ -47,6 +51,7 @@ class State {
         this.state = 'winning';
         this.gameArea.player.spriteIndex = 1;
         this.gameArea.player.size = {w: 200, h: 283};
+        rainbow();
     }
 
     lose(){

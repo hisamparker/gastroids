@@ -1,5 +1,6 @@
 const startButton = document.getElementById('start_button');
 let gameArea = null;
+document.querySelector('.brand_img').addEventListener('click', () => gameArea.state.win())
 
 if (startButton) {
   startButton.addEventListener('click', e => {
@@ -32,7 +33,10 @@ if (startButton) {
       document.getElementById('header').appendChild(resetButton);
       resetButton.addEventListener('click', e => {
         gameArea.stopGame();
-        setTimeout(() => {gameArea.resetGame();}, 2000);
+        setTimeout(() => {
+          gameArea.resetGame()
+          document.querySelector('#canvas').style.backgroundColor = 'mediumblue';
+        }, 2000);
       });
     }
   });
@@ -73,21 +77,32 @@ function trackLevels(level) {
 
 const delayedColorChange = (color, delay) => {
   return new Promise((resolve, reject) => {
+    if(gameArea.state.state === 'winning') {  
       setTimeout(() => {
           document.querySelector('#canvas').style.backgroundColor = color;
           resolve();
       }, delay);
+    } else {
+      document.querySelector('#canvas').style.backgroundColor = 'mediumblue';
+      reject();
+    }
   });
 };
 
-// async function rainbow() {
-//   await delayedColorChange('red', 1000);
-//   await delayedColorChange('orange', 1000);
-//   await delayedColorChange('yellow', 1000);
-//   await delayedColorChange('green', 1000);
-//   await delayedColorChange('blue', 1000);
-//   await delayedColorChange('indigo', 1000);
-//   await delayedColorChange('violet', 1000);
-// }
-
-// if(gameArea.state.state === 'winning') rainbow();
+async function rainbow() {
+    try {
+      await delayedColorChange('#F72585', 1000);
+      await delayedColorChange('#B5179E', 1000);
+      await delayedColorChange('#7209B7', 1000);
+      await delayedColorChange('#560BAD', 1000);
+      await delayedColorChange('#560BAD', 1000);
+      await delayedColorChange('#4361EE', 1000);
+      await delayedColorChange('#4895EF', 1000);
+      await delayedColorChange('#4CC9F0', 1000);
+      await delayedColorChange('#00e5ff', 1000);
+      await delayedColorChange('#80ffdb', 1000);
+    
+    } catch (error) {
+      console.log(`error ${error}`);
+  }
+}

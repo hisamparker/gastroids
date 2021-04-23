@@ -14,6 +14,8 @@ class Sounds {
         this.winSound.volume = 0.5;
         this.fartSound = new Audio("./sounds/fart.mp3");
         this.fartSound.volume = 0.5;
+        this.galactoseSound = new Audio("./sounds/galactose.mp3");
+        this.galactoseSound.volume = 0.7;
     }
 
     makeBackgroundMusic() {
@@ -32,6 +34,10 @@ class Sounds {
         this.achievementSound.pause();
         this.achievementSound.currentTime = 0;
         this.achievementSound.play();
+    }
+
+    makeGalactoseSound() {
+        this.galactoseSound.play();
     }
 
     makeBossHitSound() {
